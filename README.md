@@ -12,6 +12,8 @@
 
 - 真实项目地址
     * [某网站手机版](http://www.qyfwc.com/qfc_app/)
+    * [ios下载地址](https://itunes.apple.com/cn/app/%E4%BC%81%E6%9C%8D%E5%9F%8E/id1325413906?mt=8),
+    * [安卓下载地址](http://sj.qq.com/myapp/detail.htm?apkName=com.qyfwc.android),
     * 开始写项目的时候不会vue,
     * 快写完项目会vue了,但是打算离职了,
     * 没什么时间用vue统一布局代码或者重新开发一套web版了,
