@@ -1,4 +1,5 @@
 # mui-plus-webview
+
 一个基于mui的网页端模拟webview拓展
 
 模拟触发了plusReady事件
@@ -7,15 +8,33 @@
 
 以及一些mui.js中使用到的plus方法/属性的模拟
 
+# demo地址
+
+- 真实项目地址
+    * [某网站手机版](http://www.qyfwc.com/qfc_app/)
+    * 开始写项目的时候不会vue,
+    * 快写完项目会vue了,但是打算离职了,
+    * 没什么时间用vue统一布局代码或者重新开发一套web版了,
+    * 所以用iframe模拟实现了浏览器端的webview,
+    * 另外,重点说明上面的平台pc版不是我写的,
+    * 我到那家公司的时候,pc版就已经开发完了
+    * \(因为pc版的代码实在是太...所以,我必须要澄清下\)
+    * \(不知道pc版网址是什么的话,当我没说上面的话\)
+
+- demo地址
+  * [GitHub Page](https://643104191.github.io/mui-plus-webview/index.html)
+
 # 适用场景
 
 - 开始是app代码,没时间转换为浏览器端代码的
 
 - 需要在浏览器端查看webview效果的
 
+- 其实不太建议在手机端使用iframe
+
 # 使用方法
 
-在入口页面引入./js/plus.js文件即可
+- 在入口页面引入./js/plus.js文件即可
 
 # 注意事项
 
@@ -23,7 +42,7 @@
     \(js方面是因为使用了mui.extend,mui.type,mui.slice等方法\)
     \(css方面是因为使用了mui的mask等样式\)
 
-- ios的web端使用本库时,会把iframe的html,body,.mui-content的高度设置为100%
+- ios的web端使用此库时,会把iframe的html,body,.mui-content的高度设置为100%
 
 - ifrme容器的z-index的基数为500
     \(设置"webview"的zindex其实是设置iframe容器的z-index\)
@@ -40,7 +59,7 @@
       - [ ] [getDisplayWebview](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getDisplayWebview): 获取屏幕所有可视的Webview窗口
       - [x] [getWebviewById](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getWebviewById): 查找指定标识的WebviewObject窗口
       - [x] [getLaunchWebview](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getLaunchWebview): 获取应用首页WebviewObject窗口对象
-      - [ ] [getSecondWebview](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getSecondWebview): 获取应用第二个首页WebviewObject窗口对象
+      - [ ] [getSecondWebview](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getSecondWebview): 获取应用第二个首页WebviewObject窗口对象：
       - [ ] [getTopWebview](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.getTopWebview): 获取应用显示栈顶的WebviewObject窗口对象
       - [x] [hide](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.hide): 隐藏Webview窗口
       - [x] [open](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.open): 创建并打开Webview窗口
@@ -122,9 +141,7 @@
 ## 其他plus代码实现
 
 > checked状态表示调用有效果
-
 > 否则表示能调用,但无效果(空操作)
-
 > 对未列出的属性/方法进行调用将会返回undefined
 
 - [ ] [device](http://www.html5plus.org/doc/zh_cn/device.html)
@@ -160,14 +177,21 @@
 - mui.prop_attr
 
   ``` javascript
-  /**
-   * prop_attr
-   * @param {attrs/props/name} ObjectOrString 属性键值对or属性名
-   * @param {target/value} NodeOrString 目标对象or期望设置的值
-   * @return {value} 传入name时返回对应的属性值
-   */
+  // 设置或返回目标元素的"自带/自定义"属性值。
+  // 最后一个参数接受的是target
+  // 使用name设置或获取属性
+  // 获取属性:
+  var someAttr = mui.prop_attr('data-attrname', document.body);
+  var bodyId = mui.prop_attr('id', document.body);
+  // 设置属性:
+  mui.prop_attr('data-attrname', 'someValue', document.body)
+  mui.prop_attr('id', 'content', document.body)
+  mui.prop_attr('className', 'mui-hidden', document.body)
+  // 使用object设置属性:
+  mui.prop_attr({
+    'data-attrname':'someValue',
+    id:'content',
+    className:'mui-hidden mui-ios',
+  }, document.body);
   ```
-  
-  > 设置或返回被选元素的"自带/自定义"属性值。
-
   > 可参考jQuery的[attr](http://www.runoob.com/jquery/html-attr.html)/[prop](http://www.runoob.com/jquery/html-prop.html)文档
