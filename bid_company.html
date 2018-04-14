@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>用户中心-竞标</title>
+  <script src="../../js/is_iframe.php" type="text/javascript" charset="utf-8"></script>
+  <link href="../../css/mui.min.css" rel="stylesheet"/>
+  <link href="../../css/icons-extra.css" rel="stylesheet"/>
+  <script src="../../js/rem.js"></script>
+  <style type="text/css">
+    /*总体布局*/
+    html,body,.mui-content{width:100%;height:100%;overflow:hidden;background-color: #EFEFEF;}
+    body.wating .bid,body.wating .chat,body.wating .not-wating{display: none;}
+    body.bid .wating,body.bid .chat{display: none;}
+    body.chat-room .wating,body.chat-room .bid{display: none;}
+    /*顶部header*/
+    header.mui-bar.mui-bar-nav{width: 100%;height: 132px;position: absolute;top: 0px;background-color: #099;overflow: hidden;transition: height 0.5s;-webkit-transition: height 0.5s;}
+    body.wating>header.mui-bar.mui-bar-nav,body.bid.chat-room>header.mui-bar.mui-bar-nav{transition: height 0s;-webkit-transition: height 0s;}
+    body.wating>header.mui-bar.mui-bar-nav{height: 132px;}
+    body.bid.chat-room>header.mui-bar.mui-bar-nav{height: 44px;}
+    /*候标样式*/
+    header.mui-bar>a.mui-icon,
+    header.mui-bar>a:active.mui-icon,
+    header.mui-bar>.mui-title,
+    header.mui-bar>a.mui-icon.mui-active{color: #FFF;}
+    /*变化动画,可删除*/
+    .mui-focusin header.mui-bar.mui-bar-nav{transition: top 0.25s ease-out;}
+    /*聊天内容*/
+    header.mui-bar.mui-bar-nav~.mui-content{position: absolute;top: 0px;bottom: 0px;padding: 132px 0px 0.88rem;overflow: auto;}
+    body.bid.chat-room>header.mui-bar.mui-bar-nav~.mui-content{padding-top: 44px ;padding-bottom: 0.50rem;}
+    body.wating>header.mui-bar.mui-bar-nav~.mui-content{padding-bottom: 0px;}
+    body.mui-focusin>header.mui-bar.mui-bar-nav~.mui-content{padding-bottom: 0.50rem;}
+    /*放弃招标*/
+    p.abandon{width: 100%;line-height: 1;position: absolute;bottom: 0.50rem;padding: 0.05rem;margin: 0px;background: #FFF;text-indent: 0.19rem;overflow: hidden;}
+    .mui-android p.abandon,.mui-ios.mui-plus p.abandon{transition: bottom 0.5s;-webkit-transition: bottom 0.5s;}
+    p.abandon>span.mui-btn{padding: 0.25em 1em;vertical-align: middle;text-indent: 0px;font-size: 0.14rem;border-radius: 0.5em;border-color: #099;color: #099;}
+    .mui-android.mui-focusin p.abandon,.mui-ios.mui-plus.mui-focusin p.abandon,body.mui-android.chat-room p.abandon{bottom: 0px;}
+    .mui-ios.mui-focusin:not(.mui-plus) p.abandon,body.mui-ios.chat-room p.abandon{display: none;}
+    /*底部*/
+    footer.mui-input-row{width: 100%;height: 0.5rem;position: fixed;bottom: 0px;padding: 0.05rem 0.10rem;background-color: #EFEFF4;border-top: 1px solid #DEDEDE;}
+    /*发送按钮*/
+    footer.mui-input-row>label.mui-btn{padding: 10px 0px;margin: 1.5px 0px;}
+    /*输入框*/
+    footer.mui-input-row>.mui-btn~textarea{width: 82.5%;height: 0.40rem;line-height: 0.30rem;margin-right: 2.5%;padding: 0.05rem 0px;}
+    /*聊天提示*/
+    footer.mui-input-row>p{height: 0.40rem;line-height: 0.40rem;margin-bottom: 0.05rem;font-size: 0.14rem;overflow: hidden;transition: height 0.5s,margin-bottom 0.5s;-webkit-transition: height 0.5s,margin-bottom 0.5s;}
+    body.chat-room>footer.mui-input-row>p{height: 0px;margin-bottom: 0px;}
+    /*------------页面组件布局------------*/
+    /*标题*/
+    .task-title,.task-info{width: 100%;height: 44px;line-height: 44px;position: absolute;top: 44px;left: 0px;font-size: 0.16rem;}
+    .task-title{background-color: #FFF;text-align: center;}
+    .task-title>span{color: #099;}
+    /*信息*/
+    .task-info{top: 88px;background-color: #84CCC9;color: #FFF;font-size: 0.14rem;text-indent: 0.5em;}
+    .task-info>span{font-size: 0.18rem;}
+    /*竞标室信息*/
+    .task-info.wating{text-align: center;}
+    .task-info.wating>div.mui-inline{padding: 0px 5px;margin: 0px 2.5%;text-indent: 0px;font-size: 0.14rem;}
+    @media screen  and (max-width: 375px) {
+      .task-info{font-size: 4vw;}
+      .task-info>span{font-size: 4.5vw;}
+    }
+    /*倒计时*/
+    .timer-wrap{width: 40%;height: 100%;position: relative;float: right;background-color: #099;}
+    .timer-wrap:before{display: block;width: 0px;height: 0px;content: ' ';position: absolute;left: -44px;border: 22px solid transparent;border-right-color: #099;}
+    .timer-title{height: 44px;padding: 6px 0px;}
+    .timer-title>p{height: 16px;line-height: 16px;margin: 0px;font-size: 12px;color: #FFF;text-indent: 0px;}
+    .timer{width: 100%;height: 100%;position: absolute;padding-left: 0.50rem;text-indent: 0px;}
+    body.timeout .timer{text-align: center;}
+    .timer>span{display: inline-block;width: 22.5%;line-height: 24px;margin: 0px 2.5%;vertical-align: middle;background-color: #F9A439;text-align: center;}
+    .wating .timer>span,body.timeout .timer>span{width: auto;padding: 0px 0.5em;}
+    /*提示*/
+    .tips-wrap{max-width: 80%;margin: 0.1rem auto;text-align: center;}
+    .msg-tips{display: inline-block;padding: 0.25em 1em;margin: 0px;background-color: #D1D1D1;color: #F4F4F4;font-size: 0.14rem;border-radius: 0.05rem;}
+    /*消息*/
+    .msg-item{padding: 0.1rem;}
+    .msg-item .msg-user{width: 0.38rem;height: 0.38rem;display: inline-block;border-radius: 3px;vertical-align: top;text-align: center;float: left;color: #ddd;}
+    .msg-item .msg-content{display: inline-block;border-radius: 5px;background-color: #FFFFFF;color: #333;padding: 8px;vertical-align: top;font-size: 0.15rem;position: relative;margin: 0px 8px;max-width: 75%;min-width: 0.35rem;float: left;}
+    .msg-item-self .msg-user, .msg-item-self .msg-content {float: right;}
+    .msg-item .msg-content .msg-content-inner{font-size: 0.14rem;word-break:break-all;}
+    /*消息列表标书样式*/
+    /*机构名称*/
+    .msg-item .msg-content .msg-content-inner>p.seller-name{border-bottom: 1px solid #DEDEDE;text-align: center;}
+    body.wating .msg-item .msg-content .msg-content-inner>p.seller-name{min-width: 100px;max-width: 200px;margin: 0;border-bottom: none;}
+    /*报价*/
+    p.price{padding: 0px 0.40rem;}
+    p.price>span{color: #F33;}
+    /*操作按钮*/
+    div.action-btn>.mui-btn{padding: 0.25em 1em;margin: 0px 0.10rem;border-color: #099;color: #099;font-size: 0.14rem;}
+    .msg-item .msg-content .msg-content-arrow{position: absolute;border-right: none;border-top: none;background-color: #FFFFFF;width: 10px;height: 10px;left: -5px;top: 12px;-webkit-transform: rotateZ(45deg);transform: rotateZ(45deg);}
+    .msg-item-self .msg-content, .msg-item-self .msg-content .msg-content-arrow {background-color: #099;color: #fff;}
+    .msg-item-self .msg-content .msg-content-arrow {left: auto;right: -5px;-webkit-transform: rotateZ(225deg);transform: rotateZ(225deg);}
+    /*侧边栏样式*/
+    header.mui-bar.mui-bar-nav~aside.mui-content{padding-left: 25%;position: relative;left: 100%;background: rgba(255,255,255,0.70);background-clip: content-box;overflow: visible;transition: left 0.5s;-webkit-transition: left 0.5s;}
+    .aside-btn{width: 0.30rem;height: 0.50rem;margin-top: -0.15rem;position: absolute;top: 50%;right: 100%;background: rgba(255,255,255,0.70);transition: transform 0.5s,right 1s;-webkit-transition: transform 0.5s,right 0.7s;}
+    /*双箭头图标*/
+    .icon-double-arrow:before{display: inline-block;width: 100%;height: 100%;content: '';background-image: url('data:image/svg+xml;charset=utf-8,<svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1975"><path d="M483.87500027 536.60937526l344.53124973 344.53124973c10.546875 10.546875 26.3671875 10.546875 36.9140625 1e-8 10.546875-10.546875 10.546875-26.3671875 0-36.91406251l-325.19531277-325.19531277 325.19531277-325.19531277c10.546875-10.546875 10.546875-26.3671875 0-36.91406249-5.2734375-5.2734375-12.30468724-7.03124973-19.33593777-7.03124973-7.03124972 0-14.06250027 1.75781223-19.33593778 7.03124973l-344.53124972 344.53124971C475.0859375 508.48437473 475.0859375 526.06250028 483.87500027 536.60937526z" fill="#333333" p-id="1976"></path><path d="M139.34374973 536.60937527l344.53124973 344.53124973c10.546875 10.546875 26.3671875 10.546875 36.9140625 0 10.546875-10.546875 10.546875-26.3671875 0-36.9140625l-325.19531279-325.19531277 325.19531279-325.19531277c10.546875-10.546875 10.546875-26.3671875 0-36.9140625-5.2734375-5.2734375-12.30468724-7.03124973-19.33593779-7.03124972-7.03124972 0-14.06250027 1.75781223-19.33593777 7.03124972l-344.53124973 344.53124971C132.3125 508.48437473 132.3125 526.06250027 139.34374973 536.60937527z" fill="#333333" p-id="1977"></path></svg>');background-repeat: no-repeat;background-position: 50%;background-size: 100%;}
+    header.mui-bar.mui-bar-nav~aside.mui-content.show{left: 0px;overflow: hidden;}
+    aside.mui-content.show .aside-btn{right: 75%;transform: rotateY(180deg);transition: transform 0.5s,right 0s;-webkit-transition: transform 0.5s,right 0s;}
+    body.chat-room>header.mui-bar.mui-bar-nav~aside.mui-content{display: none;}
+    /*侧边栏服务机构列表样式*/
+    aside.mui-content ul.mui-table-view{height: 100%;background-color: transparent;overflow: auto;}
+    aside.mui-content ul.mui-table-view>p{display: none;margin: 10px 0px;text-align: center;}
+    aside.mui-content ul.mui-table-view>p:first-child{display: block;}
+    aside.mui-content ul.mui-table-view:after{display: none;}
+    aside.mui-content ul.mui-table-view .mui-table-cell{vertical-align: top;}
+    aside.mui-content ul.mui-table-view .mui-table-view-cell{padding: 10px 0.05rem 10px 0px;}
+    aside.mui-content ul.mui-table-view .mui-table-view-cell.mui-active{background-color: transparent;}
+    aside.mui-content ul.mui-table-view .mui-table-view-cell:after{left: 0px;}
+    aside.mui-content ul.mui-table-view .mui-table-view-cell:nth-last-child(2):after{display: none;}
+    aside.mui-content ul.mui-table-view img{width: 75%;height: auto;}
+    /*店铺名称*/
+    .mui-table h4{line-height: 0.18rem;font-size: 0.16rem;font-weight: normal;}
+    /*店铺详情*/
+    .mui-table p{color: #666;font-size: 0.14rem;}
+    .mui-table h4,.mui-table h5,.mui-table .mui-h5,.mui-table p{margin: 0px;}
+    /*展开收起按钮*/
+    .mui-table-cell>p.show-detail{height: 0.3rem;line-height: 1;padding: 0.05rem 0px;margin: 0px;position: relative;bottom: 0.15rem;color: #099;font-size: 0.14rem;text-align: center;border: 1px solid #099;background-image: linear-gradient(rgba(255,255,255,0.7),rgba(255,255,255,1));}
+    .mui-table-cell>p.show-detail:after{display: inline-block;line-height: 1;content: '展开';font-size: 0.14rem;vertical-align:middle;}
+    .mui-table-cell>p.show-detail span.icon-double-arrow{display: inline-block;font-size: 0.135rem;font-size: 0px;vertical-align:middle;}
+    .mui-table-cell>p.show-detail span.icon-double-arrow:before{width: 0.20rem;height: 0.20rem;vertical-align:middle;background-image: url('data:image/svg+xml;charset=utf-8,<svg style="vertical-align: middle;fill: #099;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1489"><path d="M195.044 511.959l29.151-29.15 287.82 287.806 287.793-287.806 29.151 29.15-316.943 316.957zM195.043 224.235l29.15-29.152 287.82 287.806 287.793-287.806 29.15 29.152-316.944 316.955z" p-id="1490"></path></svg>');}
+    /*聊天室标书信息*/
+    .mui-content>.mui-card{border-radius: 0.1rem;}
+    .mui-content>.mui-card>.mui-card-header{display: block;font-size: 0.15rem;}
+    .mui-content>.mui-card>.mui-card-header>span{color: #F33;}
+    .mui-content>.mui-card>.mui-card-footer{display: block;}
+    .mui-content>.mui-card>.mui-card-footer>div{font-size: 0.15rem;}
+    .mui-content>.mui-card>.mui-card-footer>p{text-indent: 2em;}
+    .mui-content>.mui-card p{margin: 0px;word-break: break-all;color: #000;font-size: 0.14rem;}
+  </style>
+  <style type="text/css" id="popup"></style>
+</head>
+<body class="wating">
+  <header class="mui-bar mui-bar-nav">
+    <a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="not-wating mui-title">竞标室</h1>
+    <div class="task-title bid">竞标室机构数<span>(0)</span></div>
+    <div class="task-info bid">
+      本项目平均价：<span>&yen;0.00</span>
+      <div class="timer-wrap mui-clearfix">
+        <div class="timer-title mui-pull-left">
+          <p>距离竞价</p>
+          <p>结束还剩</p>
+        </div>
+        <div class="timer mui-pull-right">:<span data-type="hour">00</span>:<span data-type="min">00</span>:<span data-type="sec">00</span></div>
+      </div>
+    </div>
+    <h1 class="wating mui-title">候标室</h1>
+    <div class="task-title wating">最低要求投标机构数<span>0</span>家</div>
+    <div class="task-info wating">
+      <div class="mui-inline mui-text-center">投标<span>0</span>家</div><div class="mui-inline mui-text-center">上线<span>0</span>家</div>
+      <div class="timer-wrap mui-clearfix">
+        <div class="timer-title mui-pull-left">
+          <p>距离竞价</p>
+          <p>开始还剩</p>
+        </div>
+        <div class="timer mui-pull-right">:<span data-type="min">00</span>:<span data-type="sec">00</span></div>
+      </div>
+    </div>
+  </header>
+  <div class="mui-content"></div>
+  <aside class="not-wating mui-content">
+    <div class="aside-btn">
+      <span class="icon-double-arrow"></span>
+    </div>
+    <ul class="mui-table-view mui-table-view-striped mui-table-view-condensed"><p>暂无机构</p></ul>
+  </aside>
+  <p class="bid abandon">没有合适的服务机构？<span class="mui-btn">放弃此次招标</span></p>
+  <footer class="not-wating mui-input-row">
+    <p class="not-wating mui-text-center">点击头像可与服务机构洽谈</p>
+    <label for="msg-input" class="mui-btn">发送</label>
+    <textarea type="text" id="msg-input"></textarea>
+  </footer>
+  <script type="text/template" id="bid-info">
+    <p class="seller-name">机构名称:<%=shop_name%></p>
+    <div class="mui-text-center bid">
+      <p class="price">报价:<span>&yen;<%=quote%></span></p>
+      <div class="action-btn"><!-- 
+       --><div class="mui-hidden">
+          <p class="compay-name">尊敬的<span><%=compay_name%></span></p>
+          <% // 将task_title拆分成每个单个字符组成的span串,防止task_title过长单独成行 %>
+          <p class="seller-tips">根据贵方发布的<span class="first"><%print($escape(task_title).split('').join('</span><span>'))%></span><span class="last">&nbsp;</span>服务公告。我已取得公司充分授权，并委派我作为投标人，现承诺如下：</p>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">我方报价：</p>
+            <p class="mui-col-xs-8">&yen;<%=quote%></p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">交付时间：</p>
+            <p class="mui-col-xs-8"><%=deliver_time%></p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">付款方式：</p>
+            <p class="mui-col-xs-8"><%=((~~payment_type)?'分期付款':'全额托管')%></p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">售后服务：</p>
+            <p class="mui-col-xs-8">提供<span><%=customer?customer:'0日'%></span>售后服务</p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">愿意接受：</p>
+            <p class="mui-col-xs-8">交保证金金额<span><%=bail%>%</span>作为售后保证金</p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">其它说明：</p>
+            <p class="mui-col-xs-8"><%=((~~message)===0?'未填写':message)%></p>
+          </div>
+        </div><!-- 
+       --><span class="mui-btn" data-type="1">标书</span><!-- 
+       --><span class="mui-btn" data-type="0" data-uid="<%=~~(uid)%>" data-taskid="<%=~~(task_id)%>">选中</span>
+      </div>
+    </div>
+  </script>
+  <script type="text/template" id="chat-bid-info">
+    <div class="mui-card">
+      <div class="mui-card-header">当前报价：<span>&yen;<%=quote%></span></div>
+      <div class="mui-card-content">
+        <div class="mui-card-content-inner">
+          <div class="mui-row">
+            <p class="mui-col-xs-4">交付时间：</p>
+            <p class="mui-col-xs-8"><%=deliver_time%></p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">付款方式：</p>
+            <p class="mui-col-xs-8"><%=((~~payment_type)?'分期付款':'全额托管')%></p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">售后服务：</p>
+            <p class="mui-col-xs-8">提供<span><%=customer?customer:'0日'%></span>售后服务</p>
+          </div>
+          <div class="mui-row">
+            <p class="mui-col-xs-4">愿意接受：</p>
+            <p class="mui-col-xs-8">交保证金金额<span><%=bail%>%</span>作为售后保证金</p>
+          </div>
+        </div>
+      </div>
+      <div class="mui-card-footer">
+        <div>机构简介:</div>
+        <p class="mui-ellipsis-2"><%=shop_desc%></p>
+      </div>
+    </div>
+  </script>
+  <script type="text/template" id="seller-info">
+    <li class="mui-table-view-cell">
+      <div class="mui-table">
+        <div class="mui-table-cell mui-col-xs-3 mui-text-center">
+          <img data-uid="<%=~~(uid)%>" src="<%=(headimg?headimg:'../../img/man_big.jpg')%>">
+        </div>
+        <div class="mui-table-cell mui-col-xs-9">
+          <h4 class="mui-ellipsis-2"><%=shop_name%></h4>
+          <p class="mui-h5 mui-ellipsis-2"><%=shop_desc%></p>
+          <p class="show-detail"><span class="icon-double-arrow"></span></p>
+        </div>
+      </div>
+    </li>
+  </script>
+  <script type="text/template" id="msg-body">
+    <div class="msg-item mui-clearfix<%=(is_self?' msg-item-self':'')%>">
+      <img class="msg-user" data-uid="<%=~~(uid)%>" src="<%=(headimg?headimg:'../../img/man_big.jpg')%>" alt="">
+      <div class="msg-content">
+        <div class="msg-content-inner"><% is_bid_info?include('bid-info',bid_info):print($escape(msg).replace(/\r\n/g, '<br>').replace(/\n/g, '<br>')) %></div>
+        <div class="msg-content-arrow"></div>
+      </div>
+    </div>
+  </script>
+  <script type="text/template" id="msg-tips">
+    <div class="tips-wrap <%=extra_class%>">
+      <p class="msg-tips"><%=msg%></p>
+    </div>
+  </script>
+  <script src="../../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/template.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/immersed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/app.js" type="text/javascript" charset="utf-8"></script>
+  <!-- <script src="../../js/script.js" type="text/javascript" charset="utf-8"></script> -->
+  <script type="text/javascript" charset="utf-8">
+    (function($,doc,win){
+      $.init({
+        keyEventBind: { // 取消安卓的menu键和返回键的监听
+          backbutton: false,
+          menubutton: false
+        }
+      });
+      $.qs = function(selector,context){
+        return $.qsa(selector,context)[0];
+      }
+      function html_2_dom (str,widthout_text_node){
+        var fragment = doc.createDocumentFragment(),
+          temp_div = doc.createElement('DIV'),
+          children_method = widthout_text_node?'children':'childNodes';
+        temp_div.innerHTML = str;
+        [].forEach.call(temp_div[children_method],function(s){
+          fragment.appendChild(s.cloneNode(true));
+        });
+        return fragment;
+      }
+      var body = doc.body,
+          body_class = body.classList,
+          body_width = 0, // 页面未显示时body.offsetWidth为0
+          header = $.qs('header',body),
+          content = $.qs('div.mui-content',body), // 消息容器
+          content_cache = '', //竞标室or候标室消息缓存
+          aside = $.qs('aside.mui-content',body), // 服务机构侧边栏
+          aside_class = aside.classList,
+          aside_btn = $.qs('div.aside-btn',aside),
+          footer = $.qs('footer',body),
+          text_input = $.qs('textarea',footer),
+          send_btn = $.qs('.mui-btn',footer),
+          seller_list = $.qs('aside ul',aside),
+          msg_cache = {}, // 消息缓存
+          user_info = app.get('user_info'),
+          style_for_popver = doc.getElementById('popup'), // popover样式
+          block_overflow_scroll = $.noop,
+          parent = {evalJS:$.noop},
+          first_focus = true,
+          tips_render = template.compile($.qs('#msg-tips', body).innerHTML),
+          msg_render = template.compile($.qs('#msg-body', body).innerHTML),
+          append_seller = (function(){
+            var empty_tips = $.qs('p',seller_list),
+                info_render = template.compile($.qs('#seller-info', body).innerHTML);
+            return function(data){
+              seller_list.insertBefore(html_2_dom(info_render(data)),empty_tips);
+            }
+          })();
+      function close_view (tips){
+        parent.evalJS((($.type(tips)=='string'&&tips.trim()!='')?'mui.toast("' + tips + '");':'') + 'view.back(true);');
+      }
+      function append_msg(msg_data){
+        var msg_html = msg_render(msg_data),
+            msg_dom = html_2_dom(msg_html);
+        if (body_class.contains('chat-room')) {
+          // 如果是聊天室
+          msg_cache[msg_data.uid] += msg_html;
+        }else{
+          // 如果是竞标室(大厅)
+          content_cache += msg_html;
+        }
+        content.appendChild(msg_dom);
+        body_class.contains('chat-room')&&(content.scrollTop = content.scrollHeight + content.offsetHeight);
+        first_focus = true; // 修改dom后重新获取焦点时先阻止一次
+      }
+      function msgTextFocus() {
+        text_input.focus();
+        setTimeout(text_input.focus.bind(text_input), 150);
+      }
+      // 安卓弹出键盘也让body加上mui-focusin类
+      text_input.addEventListener('focus',function(){
+        $.os.android&&body_class.add('mui-focusin');
+      });
+      $.os.android&&text_input.addEventListener('blur',function(){
+        setTimeout(function() {
+          body_class.remove('mui-focusin');
+        }, 100);
+      });
+      // 左上角back按钮
+      $.qs('a.mui-icon-left-nav',header).addEventListener('tap',function(){
+        if(body_class.contains('chat-room')){ // 如果是聊天室
+          content.innerHTML = content_cache;
+          text_input.blur();
+          body_class.remove('chat-room');
+        }else{ // 如果不在聊天室内
+          close_view();
+        }
+      });
+      // 选中/查看标书
+      $(body).on('tap','.action-btn>span',function(){
+        if (~~this.getAttribute('data-type')) { // 标书
+          // 弹出标书样式
+          style_for_popver.innerHTML = '.mui-popup{width: 90%;}.mui-popup-text{max-height: 420px;overflow: auto;text-align: left;}.mui-popup-text p{font-size: 0.14rem;color: #333;word-break:break-all;}.mui-popup-text p.compay-name{font-size: 0.14rem;}.mui-popup-text p.seller-tips{text-indent: 2em;}.mui-popup-text p>span{display: inline-block;padding: 0px 1em;border-bottom: 1px solid #F66;color: #F66;text-indent: 0px;}.mui-popup-text p>span+span{padding: 0px;}.mui-popup-text p>span.first{padding: 0px 0px 0px 1em;}.mui-popup-text p>span.last{padding: 0px 0.8em 0px 0px;color: #FFF;}';
+          $.alert($.qs('div.mui-hidden', this.parentNode).innerHTML.replace(/\r\n/g, '').replace(/\n/g, ''),'查看标书','关闭',function(){
+            setTimeout(function() {
+              style_for_popver.innerHTML = '';
+            }, 300);
+          },'div');
+          var popup = $.qs('.mui-popup',body);
+          if ($.qs('.mui-popup-text',popup).offsetHeight >= 400) {
+            popup.removeEventListener($.EVENT_MOVE, $.preventDefault);
+            // ios阻止滑动到顶部/底部时的继续拖拽
+            $.os.ios&&block_overflow_scroll($.qs('.mui-popup-text',popup));
+          }
+        }else{ // 选中
+          $.confirm('确定选中此机构?','提示',['取消','确定'],function(e){
+            if (e.index) {
+              $.ajax({
+                url: app.api+'Company/select_seller',
+                dataType: 'json',
+                type: 'get',
+                data: {seller_id: this.getAttribute('data-uid'),task_id:this.getAttribute('data-taskid')},
+                beforeSend:function(){win.plus&&plus.nativeUI.showWaiting('请稍后');},
+                success:function(d){
+                  if (d.code) {
+                    $.toast(d.msg);
+                  }else{
+                    close_view();
+                  }
+                },
+                error:function(){$.toast('网络错误');},
+                complete:function(){win.plus&&plus.nativeUI.closeWaiting();}
+              });
+            }
+          }.bind(this));
+        }
+      }).on('tap','img.msg-user,.mui-table-cell>img',function(){ // 点击服务机构头像进入聊天室
+        if (body_class.contains('wating')||body_class.contains('chat-room')) {return;}
+        var uid = ~~this.getAttribute('data-uid');
+        text_input.value = '';
+        send_btn.setAttribute('data-uid',uid);
+        content_cache = content.innerHTML;
+        content.innerHTML = msg_cache[uid]; // 生成的聊天内容
+        body_class.add('chat-room');
+        content.scrollTop = content.scrollHeight + content.offsetHeight;
+      });
+      // 显示/隐藏aside
+      // 未显示时通过点击aside_btn来显示
+      aside_btn.addEventListener('tap',function(){
+        aside_class.contains('show')||aside_class.add('show');
+      });
+      // 显示时通过点击padding-left来隐藏
+      aside.addEventListener('tap',function(e){
+        (e.detail.touches[0].pageX/(body_width||(body_width = body.offsetWidth)) < 0.26)&&aside_class.remove('show');
+      });
+      // 展开/收起店铺详情
+      $(seller_list).on('tap','p.show-detail',function(){
+        $.qs('p.mui-ellipsis-2',this.parentNode).classList.remove('mui-ellipsis-2');
+        this.classList.add('mui-hidden');
+      }).on('tap','h4.mui-ellipsis-2+p',function(){
+        var show_detail = $.qs('p.show-detail',this.parentNode).classList;
+        show_detail.contains('mui-hidden')&&(
+          show_detail.remove('mui-hidden'),
+          this.classList.add('mui-ellipsis-2')
+        );
+      });
+      // 聊天界面展开/收起店铺详情
+      $(content).on('tap','.mui-card-footer>p',function(){
+        this.classList.toggle('mui-ellipsis-2');
+      })
+      // 放弃招标
+      $.qs('p.abandon>span',body).addEventListener('tap',function(){
+        var task_id = ~~this.getAttribute('data-taskid');
+        if (task_id<=0) {return;}
+        $.confirm('确定放弃此次招标?','提示',['取消','确定'],function(e){
+          if (e.index) {
+              $.ajax({
+                url: app.api+'Company/abandon_task',
+                dataType: 'json',
+                type: 'get',
+                data: {task_id:task_id},
+                beforeSend:function(){win.plus&&plus.nativeUI.showWaiting('请稍后');},
+                success:function(d){
+                  if (d.code) {
+                    $.toast(d.msg);
+                  }else{
+                    close_view();
+                  }
+                },
+                error:function(){$.toast('网络错误');},
+                complete:function(){win.plus&&plus.nativeUI.closeWaiting();}
+              });
+          }
+        });
+      });
+      //解决点击"发送"按钮，导致键盘关闭的问题
+      send_btn.addEventListener($.EVENT_START, function(e) {
+        if (body_class.contains('mui-focusin')) {
+          msgTextFocus();
+          e.preventDefault();
+        }
+      });
+      //解决点击"发送"按钮，导致键盘关闭的问题
+      send_btn.addEventListener($.EVENT_MOVE, function(e) {
+        if (body_class.contains('mui-focusin')) {
+          msgTextFocus();
+          e.preventDefault();
+        }
+      });
+      // 发消息
+      send_btn.addEventListener($.EVENT_END, function(){
+        body_class.contains('mui-focusin')&&msgTextFocus();
+        var msg_str = text_input.value.trim();
+        text_input.value = '';
+        if (msg_str=='') {return ;}
+        text_input.focus();
+        append_msg({
+          is_self: true,
+          headimg: user_info.headimg,
+          msg: msg_str,
+          uid: this.getAttribute('data-uid')
+        });
+      });
+      $.plusReady(function(){
+        var _self = plus.webview.currentWebview(),
+            task_id = ~~_self.task_id;
+        parent = _self.parent();
+        if (task_id<=0) {return close_view();}
+        parent.evalJS('view.reset_after_back(function(){view.close("bid_company",true)})');
+        $.qs('p.abandon>span',body).setAttribute('data-taskid',task_id);
+        // 修正header高度&mui-content的padding-top
+        if (window.immersed) {
+          var style_element = doc.createElement('style'),
+              head_height = immersed + 44,
+              height = 132 + immersed;
+          style_element.type = 'text/css';
+          style_element.innerHTML = 'header.mui-bar.mui-bar-nav{height: '+ height +'px;}body.wating>header.mui-bar.mui-bar-nav{height: '+ height +'px;}header.mui-bar.mui-bar-nav~.mui-content{padding:'+ height +'px 0px 0.88rem;}.task-title{top: ' + head_height + 'px;}.task-info{top: ' + (immersed + 88) + 'px;}body.bid.chat-room>header.mui-bar.mui-bar-nav{height: ' + head_height + 'px;}body.bid.chat-room>header.mui-bar.mui-bar-nav~.mui-content{padding-top:' + head_height + 'px;}';
+          doc.head.appendChild(style_element);
+        }
+        function countdown(callback,step){
+          return setTimeout(function(){
+            callback(countdown(callback,step||1000));
+          },step||1000);
+        }
+        // 查询上线&投标机构
+        function Bid_num(){
+          var timer,
+              _this = this,
+              appended_seller = [], // 已经append到页面里的服务机构uid
+              bid_num = $.qs('.task-info.wating>.mui-inline>span',header),
+              online_num = $.qs('.task-info.wating>.mui-inline+.mui-inline>span',header),
+              avg_span = $.qs('.task-info.bid>span',header);
+          _this.bid_num = function(){return bid_num.innerHTML;};
+          _this.stop = function(){clearTimeout(timer);};
+          _this.query = function(id,callback){
+            $.ajax({
+              url: app.api+'User/wating_room_info',
+              data: {task_id:id},
+              type: 'get',
+              dataType: 'json',
+              success: function (d){
+                // 下一次查询
+                timer = setTimeout(_this.query, 1500, id, callback);
+                if (d&&d.code==0) {
+                  var data = d.data;
+                  // 人数信息
+                  bid_num.innerHTML = data.bid;
+                  online_num.innerHTML = data.online;
+                  // 机构平均报价
+                  avg_span.innerHTML = '&yen;' + Number(data.avg_quot).toFixed(2);
+                  // 机构进入候标室的信息
+                  if ($.type(data.bid_info)=='array') {
+                    data.bid_info.forEach(function(bid_info){
+                      if (appended_seller.indexOf(bid_info.uid) < 0) {
+                        appended_seller.push(bid_info.uid);
+                        // 进入标室信息
+                        var seller_info = data.seller_info[bid_info.uid],
+                            temp_html = tips_render({
+                              extra_class: 'wating',
+                              msg: '"' + seller_info.shop_name + '"进入候标室'
+                            });
+                        temp_html += tips_render({
+                          extra_class: 'bid',
+                          msg: '"' + seller_info.shop_name + '"进入竞标室'
+                        });
+                        content_cache += temp_html;
+                        content.appendChild(html_2_dom(temp_html));
+                        // 聊天室标书信息
+                        bid_info.shop_desc = seller_info.shop_desc;
+                        msg_cache[bid_info.uid] = template('chat-bid-info',bid_info) + (msg_cache[bid_info.uid]||'');
+                        delete bid_info.shop_desc;
+                        // 标书信息
+                        bid_info.compay_name = user_info.username;
+                        bid_info.shop_name = seller_info.shop_name;
+                        append_msg({
+                          is_self: false,
+                          uid: bid_info.uid,
+                          headimg: seller_info.headimg,
+                          is_bid_info: true,
+                          bid_info: bid_info
+                        });
+                        // 右侧的侧滑机构信息
+                        append_seller(seller_info);
+                      }
+                    });
+                  }
+                }
+                callback&&callback();
+              }
+            });
+          }
+        }
+        // 接收机构消息(待完成)
+        // 轮询接口(接口待完成)
+        // 根据uid缓存在msg_cache里面
+        // 根据body是否带有chat-room的class类名
+        // 决定要不要把生成的消息html代码append到mui-content里
+        // function get_seller_msg(){
+        //   // 大概代码为
+        //   $.get(app.api + '接口路径',{task_id:task_id},function(d){
+        //     if ((~~d.code) == 0) {
+        //       var temp = msg_render({
+        //         一些数据
+        //       });
+        //       msg_cache[d.data.uid] += temp;
+        //       if (body_class.contains('chat-room')) {
+        //         var msg_dom = html_2_dom(temp);
+        //         content.appendChild(msg_dom);
+        //       }
+        //     }
+        //     // 1.5秒后递归执行
+        //     setTimeout(get_seller_msg, 1500);
+        //   });
+        // }
+        function bid_handle (data, sum_time){
+          body_class.remove('wating');
+          body_class.add('bid');
+          // 通知后端已经开通竞价室
+          $.get(app.api + 'Company/start_bid', {task_id:task_id}, $.noop, 'json');
+          get_seller_msg();
+          // 竞标倒计时
+          var bid_countdown = $.qs('.task-info.bid', header),
+              hour_span = $.qs('[data-type="hour"]', bid_countdown),
+              mins_span = $.qs('[data-type="min"]', bid_countdown),
+              sec_span = $.qs('[data-type="sec"]',bid_countdown),
+              pre_hour = 0,pre_mins = 0;
+          if (sum_time > 10800) { // 竞标时间超过3小时
+            body_class.add('timeout');
+            return ($.qs('.timer',bid_countdown).innerHTML = '<span>已超时</span>');
+          }
+          countdown(function(timer){
+            if (sum_time < 0) {
+              clearTimeout(timer);
+              text_input.blur();
+              body_class.add('timeout');
+              return ($.qs('.timer',bid_countdown).innerHTML = '<span>已超时</span>');
+            }
+            var hour = ~~(sum_time / 3600),
+                mins = ~~((sum_time % 3600) / 60),
+                sec = (sum_time--) % 60;
+            (pre_hour != hour)&&(
+              pre_hour = hour,
+              hour_span.innerHTML = hour<10?('0' + hour):hour
+            );
+            (pre_mins != mins)&&(
+              pre_mins = mins,
+              mins_span.innerHTML = mins<10?('0' + mins):mins
+            );
+            sec_span.innerHTML = sec<10?('0' + sec):sec;
+          });
+        }
+        function is_open_bid (data, sum_time){
+          $.confirm('投标机构数未达预期,\n是否开通竞价室?', '提示', ['放弃招标','确认开通'], function(e){
+            if (e.index) {
+              bid_handle(data, sum_time);
+            }else{
+              // 通知后端把task_status改成14
+              $.ajax({
+                url: app.api+'Company/abandon_task',
+                dataType: 'json',
+                type: 'get',
+                data: {task_id:task_id},
+                beforeSend:function(){plus.nativeUI.showWaiting('请稍后');},
+                success:function(d){
+                  if (d.code) {
+                    $.toast(d.msg);
+                  }else{
+                    close_view();
+                  }
+                },
+                error:function(){$.toast('网络错误');},
+                complete:function(){plus.nativeUI.closeWaiting();}
+              });
+            }
+          });
+        }
+        function to_bid (data, sum_time, bid_num_class, bid_opened){
+          // 如果已经开通了竞价室
+          if (bid_opened === true) {
+            plus.nativeUI.showWaiting('加载中');
+            return bid_num_class.query(task_id,function(){
+              plus.nativeUI.closeWaiting();
+              bid_num_class.stop();
+              bid_handle(data, sum_time);
+            });
+          }
+          // 投标人数未达到条件情况下是否要开标
+          var bid_num = ~~$.qs('.task-info.wating>.mui-inline>span',header).innerHTML, // 实际投标人数
+              expect_num = ~~$.qs('.task-title.wating>span',header).innerHTML; // 预期人数
+          if (bid_num == 0) { // 人数为0时(可能是bid_num.query还没返回数据时)
+            bid_num_class?(plus.nativeUI.showWaiting('检查投标人数中'),bid_num_class.query(task_id,function(){
+              plus.nativeUI.closeWaiting();
+              bid_num_class.stop();
+              to_bid(data, sum_time);
+            })):is_open_bid(data, sum_time);
+          }else if(bid_num < expect_num){ // 人数不足
+            is_open_bid(data, sum_time);
+          }else{ // 人数足够
+            bid_handle(data, sum_time);
+          }
+        }
+        plus.nativeUI.showWaiting('请稍后');
+        // 查询项目状态
+        $.ajax({
+          url: app.api+'User/get_bid_info',
+          data: {task_id:task_id},
+          type: 'get',
+          dataType: 'json',
+          complete: function(x,t,e){
+            plus.nativeUI.closeWaiting();
+            if (x.readyState == 4&&x.status == 200&&t == 'success') {
+              var d = x.responseText?JSON.parse(x.responseText):{code:1,msg:'网络错误'};
+              if (d.code) {return close_view(d.msg);} // 后端返回错误
+              d = d.data;
+              $.qs('.task-title.wating',header).innerHTML = '最低要求投标机构数<span>' + d.bid_type + '</span>家';
+              // 竞价开始还剩
+              var left_time = (~~d.bid_time) - ~~((new Date())/1000);
+              // left_time = 1800;
+              if ((left_time--) > 300) { // countdown函数延迟一秒执行,先减一秒
+                var mins_span = $.qs('.task-info.wating .timer [data-type="min"]',header),
+                    pre_mins = 0,
+                    sec_span = $.qs('.task-info.wating .timer [data-type="sec"]',header),
+                    bid_num = new Bid_num();
+                // 最好在bid_num.query中动态修正left_time
+                // (思路:将left_time定义成相对bid_num.query和本次ajax的"全局变量")
+                bid_num.query(task_id);
+                countdown(function(timer){
+                  if (left_time < 300) {
+                    clearTimeout(timer);
+                    // 进入竞标室,不管再有没有机构进入标室了
+                    bid_num.stop();
+                    return to_bid(d, 10800, bid_num.query, ((~~d.task_status) == 71)||((~~d.task_status) == 0));
+                  }
+                  // 因为只有开标前30分钟才能进候标室
+                  // 所以只考虑到分钟,不考虑小时
+                  var mins = ~~(left_time / 60),
+                      sec = (left_time--) % 60;
+                  (pre_mins != mins)&&(
+                    pre_mins = mins,
+                    mins_span.innerHTML = mins<10?('0' + mins):mins
+                  );
+                  sec_span.innerHTML = sec<10?('0' + sec):sec;
+                });
+              }else{ // 竞标室
+                // left_time:距离开标时间过去的时间
+                to_bid(d, Math.abs(left_time), new Bid_num(), ((~~d.task_status) == 71)||((~~d.task_status) == 0));
+              }
+              // 候标室项目标题
+              content_cache += tips_render({
+                extra_class: 'wating',
+                msg: '"' + d.task_title + '"候标室'
+              });
+              // 竞标室项目标题
+              content.appendChild(html_2_dom(content_cache += tips_render({
+                extra_class: 'bid',
+                msg: '"' + d.task_title + '"竞标室'
+              })));
+              // 历史聊天记录(待完成)
+              // for (var i = 0.msg_arr = d.history_msg,len = msg_arr.length; i < len; i++) {
+              //   if (user_info.uid == msg_arr[i].uid) { // 如果是用户自己发的
+              //     // 就按发给谁来缓存
+              //     msg_cache[msg_arr[i].to_uid] += msg_render({
+              //       is_self: true,
+              //       uid: msg_arr[i].uid,
+              //       headimg: msg_arr[i].headimg,
+              //       msg: msg_arr[i].msg
+              //     });
+              //   }else{
+              //     // 就按发给谁来缓存
+              //     msg_cache[msg_arr[i].uid] += msg_render({
+              //       is_self: false,
+              //       uid: msg_arr[i].uid,
+              //       headimg: msg_arr[i].headimg,
+              //       msg: msg_arr[i].msg
+              //     });
+              //   }
+              // }
+            }else{
+              close_view('网络错误,请稍后再试');
+            }
+          }
+        });
+        // 检查用户中心首页是否打开
+        // (在非plus时会有这个情况出现)
+        // if (!$.os.plus&&!plus.webview.getWebviewById('user')) {
+        //   var user = app.get('subpages').user;
+        //   parent.append(plus.webview.create(user.url,user.id,$.extend({
+        //     scrollIndicator:'none',
+        //     bottom:'50px',
+        //     zindex:-1
+        //   },user.style)));
+        // }
+        $.os.ios&&$.os.plus&&_self.setStyle({
+          softinputMode:'adjustResize'
+        });
+        $.os.plus&&win.addEventListener('resize', function() {
+          content.scrollTop = content.scrollHeight + content.offsetHeight;
+        }, false);
+      });
+      if ($.os.ios) {
+        // 阻止window滚动
+        function block_window_scroll(e){
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        var header_style = header.style,
+            content_style = content.style,
+            is_web_ios = !$.os.plus,
+            tap_y = 0;
+        block_overflow_scroll = function(element){
+          element.addEventListener($.EVENT_MOVE,function(e){
+            (((!this.scrollTop)&&(e.touches[0].screenY - tap_y)>0)||((this.scrollTop == (this.scrollHeight - this.offsetHeight))&&(e.touches[0].screenY - tap_y)<0))&&block_window_scroll(e);
+          });
+        }
+        // 阻止在header/footer上触发iso网页上的滚动/弹性拖拽
+        // 如果在获得焦点时通过header/footer触发了滚动/弹性拖拽,
+        // 会有不想看到的情况
+        header.addEventListener($.EVENT_MOVE,block_window_scroll);
+        footer.addEventListener($.EVENT_MOVE,block_window_scroll);
+        aside_btn.addEventListener($.EVENT_MOVE,block_window_scroll);
+        $.qs('p.abandon',body).addEventListener($.EVENT_MOVE,block_window_scroll);
+        //阻止已经滚动了顶部/底部时,继续拖拽
+        win.addEventListener($.EVENT_START,function(e){
+          tap_y = e.touches[0].screenY;
+        });
+        block_overflow_scroll(content);
+        aside.addEventListener($.EVENT_MOVE,function(e){
+          // 阻止事件的情况
+          // 显示aside时滑动padding-left时
+          // ul滚动到顶时
+          // ul滚动到底时
+          (
+            (e.touches[0].pageX/(body_width||(body_width = body.offsetWidth)) < 0.26)
+            ||((!seller_list.scrollTop)&&(e.touches[0].screenY - tap_y)>0)
+            ||((seller_list.scrollTop == (seller_list.scrollHeight - seller_list.offsetHeight))&&(e.touches[0].screenY - tap_y)<0)
+          )&&block_window_scroll(e);
+        });
+        // 键盘弹出事件
+        is_web_ios&&win.addEventListener('keybordShow',function(e){
+          var keybord_height = e.detail.keybordHeight;
+          header_style.top = keybord_height - 1 + 'px';
+          content_style.paddingTop = keybord_height + 44 + 'px';
+        });
+        // 键盘关闭事件
+        is_web_ios&&win.addEventListener('keybordHide',function(e){
+          header.removeAttribute('style');
+          content.removeAttribute('style');
+        });
+        is_web_ios&&text_input.addEventListener('focus',function(){
+            // 如果是ios,在浏览器第一次弹出键盘时/content内容变化后弹出键盘
+            // footer会错位(浏览器会,html5+的webview不会)
+            // 需要在第二次打开时才不会错位
+            // (第一次不是指的刷新后的第一次)
+            // (而是访问网页后的第一次,哪怕是刷新了,但不是访问的第一次,就不会出现问题)
+            // 很是奇怪,所以在第一次想要弹出键盘时,先阻止一下,
+            // 让用户以为没点到,用户自然会重点一次
+            if (first_focus) {
+              this.blur();
+              return !(first_focus = false);
+            }
+        });
+        is_web_ios&&win.top.addEventListener('scroll',(function(){
+          var timer;
+          return function(){
+            clearTimeout(timer);
+            var scroll_height = win.top.scrollY;
+            // 弹出后&收起后触发
+            timer = setTimeout(scroll_height>=0?function(){
+              $.trigger(win,scroll_height?'keybordShow':'keybordHide',{
+                keybordHeight:scroll_height
+              });
+            }:$.noop,100);
+          }
+        })());
+      }
+    })(mui,document,window);
+  </script>
+</body>
+</html>
