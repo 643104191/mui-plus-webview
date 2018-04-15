@@ -41,14 +41,18 @@
 # 注意事项
 
 - 需要引入mui.js,mui.css
+
     \(js方面是因为使用了mui.extend,mui.type,mui.slice等方法\)
+
     \(css方面是因为使用了mui的mask等样式\)
 
 - ios的web端使用此库时,会把iframe的html,body,.mui-content的高度设置为100%
 
 - ifrme容器的z-index的基数为500
+
     \(设置"webview"的zindex其实是设置iframe容器的z-index\)
-    \(但是设置样式的配置按照[plus文档](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewStyles)来就好,有相关代码进行转换\)
+
+    \(但是设置样式的配置按照[plus的文档](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewStyles)来就好,有相关代码进行转换\)
 
 # 实现功能
 
@@ -79,7 +83,7 @@
         - [ ] [appendJsFile](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.appendJsFile): 添加Webview窗口预加载js文件
         - [ ] [animate](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.animate): Webview窗口内容动画
         - [x] [back](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.back): 后退到上次加载的页面
-        - [x] [beginPullToRefresh](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.beginPullToRefresh): 开始Webview窗口的下拉刷新
+        - [ ] [beginPullToRefresh](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.beginPullToRefresh): 开始Webview窗口的下拉刷新
         - [x] [canBack](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.canBack): 查询Webview窗口是否可后退
         - [ ] [canForward](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.canForward): 查询Webview窗口是否可前进
         - [ ] [checkRenderedContent](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.checkRenderedContent): 检测Webview窗口是否渲染完成
@@ -140,11 +144,13 @@
         - [ ] [onloaded](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.onloaded): Webview窗口页面加载完成事件
         - [ ] [onloading](http://www.html5plus.org/doc/zh_cn/webview.html#plus.webview.WebviewObject.onloading): Webview窗口页面开始加载事件
 
-## 其他plus代码实现
+## 其他plus代码模拟实现
 
 > checked状态表示调用有效果
+
 > 否则表示能调用,但无效果(空操作)
-> 对未列出的属性/方法进行调用将会返回undefined
+
+> 对未列出的属性/方法等进行调用将会返回undefined
 
 - [ ] [device](http://www.html5plus.org/doc/zh_cn/device.html)
   - 方法：
