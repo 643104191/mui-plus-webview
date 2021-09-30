@@ -1,3 +1,5 @@
+# 时过境迁,本项目已经跟不上时代,请使用[uni-app](https://uniapp.dcloud.io/)开发代替mui开发
+
 # mui-plus-webview
 
 一个基于mui的网页端模拟webview拓展
